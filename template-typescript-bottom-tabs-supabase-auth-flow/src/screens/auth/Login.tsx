@@ -10,6 +10,7 @@ import {
 import { supabase } from "../../initSupabase";
 import { AuthStackParamList } from "../../types/navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {
   Layout,
@@ -42,7 +43,23 @@ export default function ({
       setLoading(false);
       alert(error.message);
     }
+    await AsyncStorage.setItem('user_id', user.id);
   }
+
+
+  async function signInWithGoogle() {
+    setLoading(true);
+    const {error } = await supabase.auth.signIn({
+      provider: 'google'
+    });
+
+    if (!error) {
+      setLoading(false);
+    // Navigate to the home screen
+      navigation.navigate('../screens/Home');
+    }
+  }
+
   return (
     <KeyboardAvoidingView behavior="height" enabled style={{ flex: 1 }}>
       <Layout>
@@ -113,6 +130,17 @@ export default function ({
               text={loading ? "Loading" : "Continue"}
               onPress={() => {
                 login();
+              }}
+              style={{
+                marginTop: 20,
+              }}
+              disabled={loading}
+            />
+
+            <Button
+              text={"Sign in with Google"}
+              onPress={() => {
+                signInWithGoogle();
               }}
               style={{
                 marginTop: 20,

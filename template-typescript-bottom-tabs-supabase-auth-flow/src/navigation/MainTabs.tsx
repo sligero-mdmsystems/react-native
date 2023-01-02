@@ -7,7 +7,7 @@ import TabBarText from "../components/utils/TabBarText";
 
 import Home from "../screens/Home";
 import About from "../screens/About";
-import Profile from "../screens/Profile";
+import Wellness from "../screens/Wellness";
 
 const Tabs = createBottomTabNavigator();
 const MainTabs = () => {
@@ -36,11 +36,11 @@ const MainTabs = () => {
         }}
       />
       <Tabs.Screen
-        name="Profile"
-        component={Profile}
+        name="Wellness"
+        component={Wellness}
         options={{
           tabBarLabel: ({ focused }) => (
-            <TabBarText focused={focused} title="Profile" />
+            <TabBarText focused={focused} title="Wellness" />
           ),
           tabBarIcon: ({ focused }) => (
             <TabBarIcon focused={focused} icon={"person"} />

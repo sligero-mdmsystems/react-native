@@ -1,1 +1,5 @@
-{}
+{
+  "dependencies": {
+    "blob-util": "^2.0.2"
+  }
+}

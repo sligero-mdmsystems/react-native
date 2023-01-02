@@ -17,43 +17,18 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import RNFS from 'react-native-fs';
+import blobUtil from 'blob-util';
 
+// import RNFS from 'react-native-fs';
 export default function ({
   navigation,
 }: NativeStackScreenProps<MainStackParamList, "MainTabs">) {
   const { isDarkmode, setTheme } = useTheme();
   const [image, setImage] = useState(null);
+  const [imageUrl, setImageUrl] = useState(null);
+  const [imageName, setImageName] = useState(null);
   const [status, setStatus] = useState(null);
   const [quality, setQuality] = useState(null);
-
-  const readFile = async (uri) => {
-    try {
-      const file = await RNFS.readFile(uri, 'base64');
-      return file;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const uploadImage = async (result) => {
-    // Leer el archivo de imagen y convertirlo a base64
-    const file = await readFile(result.uri);
-    // Subir la imagen a Supabase
-    try {
-      const { body } = await supabase.from('avatars').insert({
-        file_name: 'image.jpg',
-        file_type: 'image/jpeg',
-        file_size: file.length,
-        file_data: file,
-      });
-      console.log(body);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
-  
 
   async function pickImage() {
     // Use the JS library to download a file.
@@ -63,11 +38,24 @@ export default function ({
         allowsEditing: true,
         aspect: [4, 3],
         quality: 1,
+        base64: true,
       });
-      if (!result.cancelled) {
-        uploadImage(result);
-        console.log(result.uri);
-      }
+
+      setImageUrl(result.uri)
+
+      let imageBlob = await new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+            resolve(xhr.response);
+        };
+        xhr.onerror = function() {
+            reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', result.uri, true);
+        xhr.send(null);
+    });
+    setImage(imageBlob);
     } catch (error) {
       console.log(error);
     }
@@ -78,8 +66,17 @@ export default function ({
     const { data, error } = await supabase
     .from('wellness')
     .insert([
-      { user_id: userId, estadoAnimo: status, calidadSueño: quality, imageUrl: 'test' },
-    ])
+      { user_id: userId, estadoAnimo: status, calidadSueño: quality, image_url: imageUrl },
+    ]);
+
+    const { dataStor, errorStor } = await supabase.storage
+    .from('avatars')
+    .upload(`public/${imageName}.jpg`, image, {
+      cacheControl: '3600',
+      upsert: false,
+      contentType: "image/jpeg",
+    })
+    
   }
 
   return (
@@ -140,11 +137,18 @@ export default function ({
               onChangeText={(text) => setQuality(text)}
             />
 
-            <Text style={{ marginTop: 15 }}>Foto de tu jeto</Text>
-            {/* <TouchableOpacity onPress={async() => {pickImage(); if(response?.imageData){setImage(response.uri); setImageData(response?.imageData);}}}> */}
-            <Button
+            <Text style={{ marginTop: 15 }}>Nombre de la imagen</Text>
+            <TextInput
+              containerStyle={{ marginTop: 15 }}
+              placeholder="Introduce el nombre de la imagen"
+              autoCapitalize="none"
+              autoCompleteType="off"
+              autoCorrect={false}
+              onChangeText={(text) => setImageName(text)}
+            />
 
-              text={"asdasd"}
+            <Button
+              text={"Escoger Imagen"}
               onPress={() => {
                 pickImage();
               }}
@@ -152,9 +156,8 @@ export default function ({
                 marginTop: 20,
               }}
             />
-            <Text style={{ marginTop: 15 }}> Pick an image from camera roll </Text>
-            {/* </TouchableOpacity> */}
-            {image && <Image source={{ uri: image }} style={{ width: 200, height: 200, marginTop: 15 }} />}
+            
+            {imageUrl ? <Image source={{ uri: imageUrl }} style={{ width: 200, height: 200, marginTop: 10 }} /> : null}
             <Button
 
               text={"Enviar"}
@@ -162,7 +165,7 @@ export default function ({
                 insertData();
               }}
               style={{
-                marginTop: 20,
+                marginTop: 10,
               }}
             />
             

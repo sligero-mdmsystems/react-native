@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { View, Linking, Image, TouchableOpacity} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Linking, Image, TouchableOpacity, FlatList } from "react-native";
+import { Card } from "react-native-elements";
 import { MainStackParamList } from "../types/navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { supabase } from "../initSupabase";
@@ -15,20 +16,15 @@ import {
   themeColor,
 } from "react-native-rapi-ui";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export default function ({
-  navigation,
-}: NativeStackScreenProps<MainStackParamList, "MainTabs">) {
+export default function ({ navigation }: NativeStackScreenProps<MainStackParamList, "MainTabs">) {
   const { isDarkmode, setTheme } = useTheme();
 
   const [wellness, setWellness] = useState(null);
   async function showData() {
-    const userId = await AsyncStorage.getItem('user_id');
-    const { data, error } = await supabase
-    .from('wellness')
-    .select()
-    .eq( 'user_id', userId )
+    const userId = await AsyncStorage.getItem("user_id");
+    const { data, error } = await supabase.from("wellness").select().eq("user_id", userId);
     setWellness(data);
   }
 
@@ -60,29 +56,35 @@ export default function ({
           justifyContent: "center",
         }}
       >
-                    <Button
+        <Button
+          text={"Show data"}
+          onPress={() => {
+            showData();
+          }}
+          style={{
+            marginTop: 10,
+          }}
+        />
 
-              text={"Show data"}
-              onPress={() => {
-                showData();
-              }}
-              style={{
-                marginTop: 10,
-              }}
-              />
-
-            {wellness?.map((item) => (
-            <Section style={{ marginTop: 20 }}>
-
-              <SectionContent>
-                <Text key={item.id}><strong>Id:</strong> {item.id}</Text>
-                <Text style={{ marginTop: 10 }} key={item.id}><strong>Estado de ánimo:</strong> {item.estadoAnimo}</Text>
-                <Text style={{ marginTop: 10 }} key={item.id}><strong>Calidad de sueño:</strong> {item.calidadSueño}</Text>
-                <Image source={{ uri: item.image_url }} style={{ width: 200, height: 200, marginTop: 10 }}></Image>
-
-              </SectionContent>
-              </Section>
-            ))}
+        <FlatList
+          data={wellness}
+          renderItem={({ item }) => (
+            <Card>
+              <Card.Title key={item.id}>{item.id}</Card.Title>
+              <Card.Divider />
+              <Image
+                source={{ uri: "https://zgrlireycbtaumwfayab.supabase.co/" + item.image_url }}
+                style={{ width: 200, height: 200, marginTop: 10 }}
+              ></Image>
+              <Text style={{ marginTop: 10 }} key={item.id}>
+                Estado de ánimo: {item.estadoAnimo}
+              </Text>
+              <Text style={{ marginTop: 10 }} key={item.id}>
+                Calidad de sueño: {item.calidadSueño}
+              </Text>
+            </Card>
+          )}
+        />
       </View>
     </Layout>
   );

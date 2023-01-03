@@ -1,5 +1,6 @@
 {
   "expo": {
+    "scheme": "template-typescript-bottom-tabs-supabase-auth-flow",
     "name": "template-typescript-bottom-tabs-supabase-auth-flow",
     "slug": "template-typescript-bottom-tabs-supabase-auth-flow",
     "version": "1.0.0",
@@ -13,9 +14,7 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },

@@ -27,36 +27,24 @@ const MainTabs = () => {
         name="Home"
         component={Home}
         options={{
-          tabBarLabel: ({ focused }) => (
-            <TabBarText focused={focused} title="Home" />
-          ),
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} icon={"md-home"} />
-          ),
+          tabBarLabel: ({ focused }) => <TabBarText focused={focused} title="Home" />,
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} icon={"md-home"} />,
         }}
       />
       <Tabs.Screen
         name="Wellness"
         component={Wellness}
         options={{
-          tabBarLabel: ({ focused }) => (
-            <TabBarText focused={focused} title="Wellness" />
-          ),
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} icon={"person"} />
-          ),
+          tabBarLabel: ({ focused }) => <TabBarText focused={focused} title="Wellness" />,
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} icon={"person"} />,
         }}
       />
       <Tabs.Screen
         name="About"
         component={About}
         options={{
-          tabBarLabel: ({ focused }) => (
-            <TabBarText focused={focused} title="About" />
-          ),
-          tabBarIcon: ({ focused }) => (
-            <TabBarIcon focused={focused} icon={"ios-information-circle"} />
-          ),
+          tabBarLabel: ({ focused }) => <TabBarText focused={focused} title="About" />,
+          tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} icon={"ios-information-circle"} />,
         }}
       />
     </Tabs.Navigator>

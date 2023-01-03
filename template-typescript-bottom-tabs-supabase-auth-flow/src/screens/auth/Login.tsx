@@ -1,29 +1,16 @@
 import React, { useState } from "react";
-import { StatusBar } from "expo-status-bar";
-import {
-  ScrollView,
-  TouchableOpacity,
-  View,
-  KeyboardAvoidingView,
-  Image,
-} from "react-native";
+import { ScrollView, TouchableOpacity, View, KeyboardAvoidingView, Image } from "react-native";
 import { supabase } from "../../initSupabase";
 import { AuthStackParamList } from "../../types/navigation";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useNavigation } from "@react-navigation/native";
+import * as AuthSession from "expo-auth-session";
+import { startAsync, makeRedirectUri } from "expo-auth-session";
 
-import {
-  Layout,
-  Text,
-  TextInput,
-  Button,
-  useTheme,
-  themeColor,
-} from "react-native-rapi-ui";
+import { Layout, Text, TextInput, Button, useTheme, themeColor } from "react-native-rapi-ui";
 
-export default function ({
-  navigation,
-}: NativeStackScreenProps<AuthStackParamList, "Login">) {
+export default function ({ navigation }: NativeStackScreenProps<AuthStackParamList, "Login">) {
   const { isDarkmode, setTheme } = useTheme();
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -43,21 +30,23 @@ export default function ({
       setLoading(false);
       alert(error.message);
     }
-    await AsyncStorage.setItem('user_id', user.id);
+    await AsyncStorage.setItem("user_id", user.id);
   }
 
-
   async function signInWithGoogle() {
-    setLoading(true);
-    const {error } = await supabase.auth.signIn({
-      provider: 'google'
-    });
+    const returnUrl = makeRedirectUri({ useProxy: false });
+    console.log(returnUrl);
+    const authUrl = `https://zgrlireycbtaumwfayab.supabase.co/auth/v1/authorize?provider=google&redirect_to=${returnUrl}`;
 
-    if (!error) {
-      setLoading(false);
-    // Navigate to the home screen
-      navigation.navigate('../screens/Home');
+    const response = await startAsync({ authUrl, returnUrl });
+    console.log(response);
+    if (!response || !response.params?.refresh_token) {
+      return;
     }
+
+    await supabase.auth.signIn({
+      refreshToken: response.params.refresh_token,
+    });
   }
 
   return (
